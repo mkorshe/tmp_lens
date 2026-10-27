@@ -340,13 +340,15 @@ const TH = {
   light: { bg: '#f4f2ec', inC: '#8a5e00', outC: '#0b6fae', hl: '#c2188f', ball: '#9a9aa0', ballOp: 0.22, wire: 0x000000, wireOp: 0.1, lead: 'rgba(0,0,0,.45)', hlLine: 'rgba(11,111,174,.85)' },
 };
 // сноски розділів 1–4: точка на сцені і бік картки
-const ANCH = [[-2.4, 0.42, 0, 'right'], [4.2, 1.7, 0, 'left'], [-2.0, 1.55, 0, 'right'], [5.6, 0, 0, 'left']];
+// розділ 3 стоїть над пучком після лінзи: шари зсунуто вправо на TWO_DX
+const TWO_DX = 5.0, TWO_DY = -0.4;
+const ANCH = [[-2.4, 0.42, 0, 'right'], [4.2, 1.7, 0, 'left'], [-2.0 + TWO_DX, 1.55 + TWO_DY, 0, 'left'], [5.6, 0, 0, 'left']];
 // кожен екран — свій стан сцени; камера летить слідом за світлом: [ціль x, y, z, відстань, yaw, pitch]
 const VIEWS = [
   [0.3, 1.45, 0, 9.2, 0.0, -0.04],     // назва над потоком; лінза видна повністю
   [0.55, 0.1, 0, 5.0, -0.55, 0.12],     // 1 — варіант входить у GEM-лінзу
   [3.9, 1.4, 0, 5.4, 0.45, 0.22],      // 2 — гени після фокуса вмикаються парами
-  [-1.9, 1.3, 0, 5.4, -0.35, 0.2],     // 3 — два шари й котушки над потоком ДНК
+  [2.9, 0.7, 0, 5.0, 0.3, 0.14],       // 3 — зум на пучок після лінзи; над ним два шари й котушки
   [1.8, 0, 0, 12, 0.55, 0.42],         // 4 — кілька досліджень → Σ
   [-2.0, -2.2, 0, 15, 0.3, 0.22],      // 5 — уся картина
   [0.6, 0, 0, 8, -0.9, 1.05],          // CV — спокійний вид згори
@@ -363,8 +365,8 @@ const HOTS = [
   ['rps26', () => NODES[0].position.clone(), [30, -50], [2]],
   ['coexp', () => NODES[1].position.clone(), [-110, -40], [2]],
   ['tcell', () => NODES[4].position.clone(), [40, -46], [2]],
-  ['atac', () => new V3(-3.2, 1.75, 0), [-40, -50], [3]],
-  ['expression', () => new V3(-3.2, 1.35, 0), [-60, 60], [3]],
+  ['atac', () => new V3(-3.2 + TWO_DX, 1.75 + TWO_DY, 0), [-40, -50], [3]],
+  ['expression', () => new V3(-3.2 + TWO_DX, 1.35 + TWO_DY, 0), [-60, 60], [3]],
   ['meta', () => new V3(SIG.x, SIG.y, SIG.z), [30, -50], [4]],
   ['signal', () => new V3(3.4, 1.2, 0), [30, -56], [5]],
 ];
@@ -641,16 +643,6 @@ const halo = (() => { const c = document.createElement('canvas'); c.width = c.he
 const wire = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.SphereGeometry(R, 24, 12)), new THREE.LineBasicMaterial({ transparent: true }));
 scene.add(wire);
 const glowTex = halo.material.map;                    // м’яка кругла пляма — для сяйва вузлів і пилу
-// спалах у фокусі: промені й кольорове кільце, як у справжній оптиці
-const flare = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
-  const r = g.createRadialGradient(128, 128, 0, 128, 128, 40); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 256, 256);
-  g.globalCompositeOperation = 'lighter';
-  for (const [a, l, w] of [[0, 128, 3], [Math.PI / 2, 128, 3], [Math.PI / 4, 70, 1.5], [-Math.PI / 4, 70, 1.5]]) {
-    const lg = g.createLinearGradient(128 - Math.cos(a) * l, 128 - Math.sin(a) * l, 128 + Math.cos(a) * l, 128 + Math.sin(a) * l);
-    lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.5, 'rgba(255,255,255,.9)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
-    g.strokeStyle = lg; g.lineWidth = w; g.beginPath(); g.moveTo(128 - Math.cos(a) * l, 128 - Math.sin(a) * l); g.lineTo(128 + Math.cos(a) * l, 128 + Math.sin(a) * l); g.stroke(); }
-  ['rgba(255,80,80,.35)', 'rgba(80,255,160,.3)', 'rgba(90,140,255,.35)'].forEach((s, i) => { g.strokeStyle = s; g.lineWidth = 2; g.beginPath(); g.arc(128, 128, 62 + i * 5, 0, Math.PI * 2); g.stroke(); });
-  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); sp.scale.set(1.3, 1.3, 1); scene.add(sp); return sp; })();
 // пил у просторі: дає глибину, повільно дрейфує
 const dust = (() => { const n = 900, p = new Float32Array(n * 3); let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < n; i++) p.set([-16 + r() * 32, -8 + r() * 16, -14 + r() * 18], i * 3);
@@ -768,7 +760,7 @@ const SPARKS = NODES.slice(1).map(n => { const s = new THREE.Sprite(layerMat(net
 const RIPPLE = new THREE.Mesh(new THREE.RingGeometry(0.96, 1, 64), layerMat(netL, new THREE.MeshBasicMaterial({ color: NETC.acc, side: THREE.DoubleSide }), 0.7)); netL.g.add(RIPPLE);
 { const f = focusPt(); netL.g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([f, NODES[0].position]), layerMat(netL, new THREE.LineDashedMaterial({ color: '#9aa0b8', dashSize: 0.06, gapSize: 0.06 }), 0.5)).computeLineDistances()); }
 // 3 — нитка на котушках: над потоком ДНК намотана на нуклеосоми; біля варіанта котушки розходяться, нитка розмотується і її читають
-const twoL = newLayer(() => SW(3));
+const twoL = newLayer(() => SW(3)); twoL.g.position.set(TWO_DX, TWO_DY, 0);
 const BARS = [];
 [[1.75, '#c08bff'], [1.35, '#5ec8ff']].forEach(([y, c], row) => { for (let i = 0; i < 44; i++) { const x = -4.4 + i * 0.09;
   const b = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1, 0.06), layerMat(twoL, new THREE.MeshBasicMaterial({ color: c }), 0.75)); b.position.set(x, y, 0); b.userData = { ...b.userData, y, row, x, i }; twoL.g.add(b); BARS.push(b); } });
@@ -1036,7 +1028,6 @@ function applyTheme() {
   ballU.uTint.value.set(t.ball); ballU.uOp.value = t.ballOp; ballU.uRim.value.set(dark ? '#9fd8ff' : '#0b6fae'); wire.material.color.set(t.wire); wire.material.opacity = t.wireOp;
   // спектр типів клітин (Т, B, NK, моноцити, ДК); на світлому тлі — насиченіші
   (dark ? ['#ff9b4a', '#5ec8ff', '#c08bff', '#5dffa8', '#fff27a'] : ['#c2410c', '#0b6fae', '#7a3fb0', '#0f8a5f', '#8a5e00']).forEach((c, i) => U.uSpec.value[i].set(c));
-  flare.material.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; flare.material.color.set(dark ? '#cfe9ff' : '#0b6fae'); flare.material.needsUpdate = true;
   dust.material.color.set(dark ? '#9fc4ff' : '#5d6272'); dust.material.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; dust.material.opacity = dark ? 0.55 : 0.35; dust.material.needsUpdate = true;
   threadMat.color.set(t.inC);
   // сяйво: на темному тлі світло додається, на світлому — звичайна кольорова пляма (інакше біліє)
@@ -1112,7 +1103,6 @@ renderer.setAnimationLoop(() => {
   animLayers(t);
   ballU.uT.value = t;
   U.uDisp.value = Math.max(SW(1), 0.6 * SW(5));                                   // призма: спектр клітин у розділі 1 і в загальній картині
-  flare.position.set(P.n / (2 * (P.n - 1)), 0, 0); flare.scale.setScalar(1.1 + 0.18 * Math.sin(t * 2.2) + 0.25 * SW(1));
   dust.rotation.y = t * 0.012; dust.position.y = Math.sin(t * 0.1) * 0.2;
   renderer.render(scene, camera);
   overlays(); gameTick();
