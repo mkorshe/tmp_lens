@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="uk">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -226,9 +226,9 @@
 
   /* телефон */
   @media (max-width:760px){ section{align-items:flex-end;padding:0 48px 8vh 16px} section.right{justify-content:flex-start} .note{max-width:none;width:100%;padding:20px 20px 18px}
-    header{padding:14px 16px} .brand{max-width:110px;line-height:1.5} #rail{right:4px} #rail button{width:34px} .hero{padding:12vh 48px 0 16px}
+    header{padding:14px 16px} .brand{max-width:150px;line-height:1.5;font-size:9.5px;letter-spacing:.14em} #rail{right:4px} #rail button{width:34px} .hero{padding:12vh 48px 0 16px}
     .note .an{font-size:14px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden} .ov{padding:28px 20px} }
-  @media (max-width:440px){ .brand{display:none} header{justify-content:flex-end} }
+  @media (max-width:340px){ .brand{display:none} header{justify-content:flex-end} }
   @media (prefers-reduced-motion:reduce){ body::before,.cue i::after{animation:none} .note[data-i]>*,.note h2{transition:none;clip-path:none} }
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
@@ -240,7 +240,6 @@
 <header>
   <div class="brand" id="brand"></div>
   <div class="ctl" id="ctl">
-    <button data-lang="uk">UA</button><button data-lang="en">EN</button><span class="sep"></span>
     <button id="simple"></button><span class="menuw"><button id="expBtn"></button><div id="menu"><button id="glossBtn"></button><button id="labBtn"></button><button id="quizBtn"></button><button id="play"></button><div class="fd" id="found"></div></div></span><button id="theme">◐</button>
   </div>
 </header>
@@ -413,7 +412,7 @@ const HOTS = [
 
 /* ══════════ СТАН, МОВА, РОЗМІТКА ══════════ */
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
-let lang = ['uk', 'en'].includes(store.get('lang')) ? store.get('lang') : 'uk';
+const lang = 'en';                                   // сайт лише англійською
 let theme = store.get('theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
 let kid = store.get('kid') === '1', gemOn = false, playing = true, tcMode = false;     // GEM відкривається лише по кліку
 const $ = id => document.getElementById(id);
@@ -606,7 +605,6 @@ document.addEventListener('click', e => {
   if (t.id === 'modal' || t.classList.contains('x')) { $('modal').classList.remove('on'); return; }
   const md = t.closest('[data-mode]'); if (md) { $('modal').querySelector('.info').innerHTML = info(modalI, +md.dataset.mode); return; }
   const mv = t.closest('[data-m]'); if (mv) { openNote((modalI + +mv.dataset.m + 5) % 5); return; }
-  if (t.dataset.lang) { lang = t.dataset.lang; store.set('lang', lang); render(); if ($('over').classList.contains('on')) $('over').classList.remove('on', 'side'); return; }
   if (t.id === 'theme') { theme = theme === 'dark' ? 'light' : 'dark'; store.set('theme', theme); applyTheme(); return; }
   if (t.id === 'play') { playing = !playing; $('play').textContent = playing ? '❚❚ ' + T[lang].ui.pause : '▶ ' + T[lang].ui.resume; return; }
   if (!t.closest('#pop')) unpop();
