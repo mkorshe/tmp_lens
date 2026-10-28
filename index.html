@@ -108,6 +108,16 @@
   .hot.lab::before{content:'';width:5px;height:5px;background:var(--acc);flex:none}
   .hot.lab:hover{border-color:var(--acc);color:var(--acc)}
 
+  /* перетягування й закриття: «око» картки й підказки — ручка; хрестик згортає картку до заголовка */
+  [data-drag]{cursor:grab} body.dragging,body.dragging *{cursor:grabbing!important;user-select:none}
+  .nx,.px{position:absolute;right:10px;top:9px;width:22px;height:22px;background:none;border:0;color:var(--muted);font:300 18px/1 var(--sans);cursor:pointer;z-index:2;transition:color .2s,transform .3s}
+  .nx:hover,.px:hover{color:var(--txt);transform:rotate(90deg)}
+  .note .n{padding-right:26px} #pop .eb{padding-right:22px}
+  .note.min>:not(.n):not(h2):not(.nx),body.quiet .note:not(.cv)>:not(.n):not(h2):not(.nx){display:none}
+  .note.min h2,body.quiet .note:not(.cv) h2{margin-bottom:0;font-size:clamp(18px,1.6vw,22px)}
+  body.quiet #hots,body.quiet #elabs,body.quiet #leads{display:none}
+  .hot .hx{font-style:normal;margin-left:2px;padding:0 0 0 6px;border-left:1px solid var(--line2);color:var(--muted);display:none}
+  .hot:hover .hx{display:inline} .hot .hx:hover{color:var(--hl)}
   /* підказка-етикетка */
   #pop{position:fixed;z-index:12;max-width:380px;width:calc(100% - 24px);padding:18px 20px 16px;background:var(--solid);border:1px solid var(--line2);box-shadow:var(--shadow);
     font-size:13.5px;line-height:1.55;display:none;animation:popin .28s cubic-bezier(.2,.8,.2,1)}
@@ -244,7 +254,7 @@
 <header>
   <div class="brand" id="brand"></div>
   <div class="ctl" id="ctl">
-    <button id="simple"></button><span class="menuw"><button id="expBtn"></button><div id="menu"><button id="glossBtn"></button><button id="labBtn"></button><button id="quizBtn"></button><button id="play"></button><div class="fd" id="found"></div></div></span><button id="theme">◐</button>
+    <button id="quiet"></button><button id="simple"></button><span class="menuw"><button id="expBtn"></button><div id="menu"><button id="glossBtn"></button><button id="labBtn"></button><button id="quizBtn"></button><button id="play"></button><div class="fd" id="found"></div></div></span><button id="theme">◐</button>
   </div>
 </header>
 <nav id="rail"></nav>
@@ -302,7 +312,7 @@ const T = {
       'Щоб ці знання дійшли до клініки, потрібна експериментальна перевірка причинності.'],
     finalKid: ['Відмінності в ДНК змінюють, як гени працюють разом — часто лише в одному типі клітин.', 'Найважливіші відмінності видно, коли дивишся на два шари в одній клітині.', 'Об’єднуючи дослідження, важливо, скільки клітин дала кожна людина.', 'Щоб допомогти людям, треба експериментом довести причину.'],
     again: 'Спочатку', foot: 'Літери — послідовність ДНК локусу FAM167A–BLK (chr8, GRCh38, NCBI); підкреслено 1 149 поширених варіантів (dbSNP). Крізь кульову лінзу ДНК стає цифровим сигналом: A00 C01 G10 T11. GEM — схематично.',
-    ui: { exp: 'Дослідити', gl: 'Словник', lab: 'Лабораторія', quiz: 'Тест', pause: 'Пауза', resume: 'Відновити рух', found: 'Відкрито', how: 'Як це працює', th: 'У цій дисертації', disc: 'Обговорення', cv: 'Про мене', title: 'Назва', tc: 'Т-клітини ⇄', game: 'Злови варіант', bulk: 'Суміш чи окремі клітини', lens: 'Лінза', gemOpen: 'Крапля GEM · відкрити', an: 'Аналогія', scroll: 'Гортайте', term: 'Термін', fig: 'Схема', prev: '← Попередній розділ', next: 'Наступний розділ →', el: ['усі клітини', 'лише Т-клітини', 'поза Т-клітинами — немає', 'варіант rs1131017', 'лише підсумки · β, SE'] },
+    ui: { exp: 'Дослідити', gl: 'Словник', lab: 'Лабораторія', quiz: 'Тест', pause: 'Пауза', resume: 'Відновити рух', found: 'Відкрито', how: 'Як це працює', th: 'У цій дисертації', disc: 'Обговорення', cv: 'Про мене', title: 'Назва', tc: 'Т-клітини ⇄', game: 'Злови варіант', bulk: 'Суміш чи окремі клітини', lens: 'Лінза', gemOpen: 'Крапля GEM · відкрити', an: 'Аналогія', scroll: 'Гортайте', term: 'Термін', fig: 'Схема', prev: '← Попередній розділ', next: 'Наступний розділ →', ann: 'Підписи', hide: 'Згорнути', close: 'Закрити', el: ['усі клітини', 'лише Т-клітини', 'поза Т-клітинами — немає', 'варіант rs1131017', 'лише підсумки · β, SE'] },
   },
   en: {
     kick: 'PhD thesis', lead: 'How small differences in DNA act inside individual blood cells.',
@@ -335,7 +345,7 @@ const T = {
       'Experimental proof of causality is needed before this knowledge can guide clinical care.'],
     finalKid: ['DNA differences change how genes work together — often in just one type of cell.', 'The most important differences show up when you look at two layers in the same cell.', 'When combining studies, it matters how many cells each person gave.', 'To help people, we must prove the cause with experiments.'],
     again: 'From the start', foot: 'Letters: DNA sequence of the FAM167A–BLK locus (chr8, GRCh38, NCBI); 1,149 common variants underlined (dbSNP). Through the ball lens, DNA becomes a digital signal: A00 C01 G10 T11. GEM is schematic.',
-    ui: { exp: 'Explore', gl: 'Glossary', lab: 'Lab', quiz: 'Quiz', pause: 'Pause', resume: 'Resume flow', found: 'Found', how: 'How it works', th: 'In this thesis', disc: 'Discussion', cv: 'About me', title: 'Title', tc: 'T cells ⇄', game: 'Catch a variant', bulk: 'Bulk or single-cell', lens: 'Lens', gemOpen: 'GEM droplet · open', an: 'Analogy', scroll: 'Scroll', term: 'Term', fig: 'Figure', prev: '← Previous chapter', next: 'Next chapter →', el: ['all cells', 'T cells only', 'off outside T cells', 'variant rs1131017', 'summary statistics only · β, SE'] },
+    ui: { exp: 'Explore', gl: 'Glossary', lab: 'Lab', quiz: 'Quiz', pause: 'Pause', resume: 'Resume flow', found: 'Found', how: 'How it works', th: 'In this thesis', disc: 'Discussion', cv: 'About me', title: 'Title', tc: 'T cells ⇄', game: 'Catch a variant', bulk: 'Bulk or single-cell', lens: 'Lens', gemOpen: 'GEM droplet · open', an: 'Analogy', scroll: 'Scroll', term: 'Term', fig: 'Figure', prev: '← Previous chapter', next: 'Next chapter →', ann: 'Annotations', hide: 'Collapse', close: 'Close', el: ['all cells', 'T cells only', 'off outside T cells', 'variant rs1131017', 'summary statistics only · β, SE'] },
   },
 };
 
@@ -392,7 +402,7 @@ const VIEWS = [
   [0.55, 0.1, 0, 5.0, -0.55, 0.12],     // 1 — варіант входить у GEM-лінзу
   [3.9, 1.4, 0, 5.4, 0.45, 0.22],      // 2 — гени після фокуса вмикаються парами
   [2.9, 0.7, 0, 5.0, 0.3, 0.14],       // 3 — зум на пучок після лінзи; над ним два шари й котушки
-  [1.8, 0, 0, 12, 0.55, 0.42],         // 4 — кілька досліджень → Σ
+  [-1.2, 0.1, 1.85, 19.5, 0.55, 0.34],  // 4 — когорти → приймальна тарілка; сцена праворуч від картки
   [-2.0, -2.2, 0, 15, 0.3, 0.22],      // 5 — уся картина
   [0.6, 0, 0, 8, -0.9, 1.05],          // CV — спокійний вид згори
 ];
@@ -419,7 +429,7 @@ const HOTS = [
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 const lang = 'en';                                   // сайт лише англійською
 let theme = store.get('theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-let kid = store.get('kid') === '1', gemOn = false, playing = true, tcMode = false;     // GEM відкривається лише по кліку
+let quiet = store.get('quiet') === '1', kid = store.get('kid') === '1', gemOn = false, playing = true, tcMode = false;     // GEM відкривається лише по кліку
 const $ = id => document.getElementById(id);
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 // [термін] у тексті → кнопка з поясненням (і в науковому, і в простому режимі)
@@ -430,7 +440,7 @@ const hotLabel = k => k === 'gem' && !gemOn ? T[lang].ui.gemOpen : (G[lang][k][4
 
 // перемикачі сцени (GEM, Т-клітини) оновлюють лише підписи — без перебудови сторінки
 function paintToggles() {
-  document.querySelectorAll('.hot').forEach(h => { h.textContent = hotLabel(h.dataset.h); });
+  document.querySelectorAll('.hot .ht').forEach(h => { h.textContent = hotLabel(h.parentElement.dataset.h); });
   document.querySelectorAll('[data-try="tc"]').forEach(b => b.classList.toggle('on', tcMode));
 }
 function render() {
@@ -439,7 +449,7 @@ function render() {
   const tryRow = i => { const t = TRY(i); return t.length ? `<div class="try">${t.map(([l, a]) => `<button data-try="${a}" class="${a === 'tc' && tcMode ? 'on' : ''}">${l}</button>`).join('')}</div>` : ''; };
   const card = i => {
     const [t, p, st, src] = L.c[i], [kt, kp] = L.kid[i];
-    return `<div class="note" data-i="${i}"><div class="n">${L.ch} ${i + 1}</div><h2>${kid ? kt : t}</h2><p>${terms(kid ? kp : p)}</p>${anBox(i)}
+    return `<div class="note" data-i="${i}"><button class="nx" data-nx aria-label="${u.hide}">×</button><div class="n" data-drag>${L.ch} ${i + 1}</div><h2>${kid ? kt : t}</h2><p>${terms(kid ? kp : p)}</p>${anBox(i)}
       ${st.length ? `<div class="stats">${st.map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div>` : ''}
       ${kid ? '' : `<div class="src">${src}</div>`}${tryRow(i)}<div class="more">${L.more} →</div></div>`;
   };
@@ -449,7 +459,7 @@ function render() {
       <button class="cue" data-go="1">${u.scroll}<i></i></button></section>` +
     [0, 1, 2, 3].map(i => `<section class="${ANCH[i][3] === 'right' ? 'right' : ''}">${card(i)}</section>`).join('') +
     // розділ 5 (обговорення) і головні висновки — один екран
-    `<section><div class="note final in" data-final><div class="n">${L.ch} 5 · ${u.disc}</div><h2>${L.finalT}</h2><p class="lead">${esc(kid ? L.kid[4][1] : L.c[4][1])}</p>${anBox(4)}
+    `<section><div class="note final in" data-final><button class="nx" data-nx aria-label="${u.hide}">×</button><div class="n" data-drag>${L.ch} 5 · ${u.disc}</div><h2>${L.finalT}</h2><p class="lead">${esc(kid ? L.kid[4][1] : L.c[4][1])}</p>${anBox(4)}
       <ol>${(kid ? L.finalKid : L.final).map((t, i) => `<li data-fin="${i}">${t}</li>`).join('')}</ol>
       <div class="row"><button class="btn" data-note="4">${L.more} →</button><button class="btn" data-try="lab:3">${u.quiz}</button><button class="btn solid" data-go="6">${u.cv} →</button></div></div></section>` +
     `<section class="cvs"><div class="note cv in"><div class="n">${u.cv}</div><h2>${C.name}</h2><p class="bio">${C.bio}</p><div class="cvg">
@@ -461,11 +471,12 @@ function render() {
   $('expBtn').textContent = u.exp + ' ▾'; $('glossBtn').textContent = u.gl; $('labBtn').textContent = u.lab; $('quizBtn').textContent = u.quiz;
   $('play').textContent = playing ? '❚❚ ' + u.pause : '▶ ' + u.resume; paintFound();
   $('simple').textContent = L.simple; $('simple').classList.toggle('on', kid);
+  $('quiet').textContent = u.ann; $('quiet').classList.toggle('on', !quiet); document.body.classList.toggle('quiet', quiet);
   document.querySelectorAll('[data-lang]').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
   const names = [u.title, ...L.c.slice(0, 4).map(c => c[0]), u.disc, u.cv];
   $('rail').innerHTML = names.map((nm, i) => `<button data-go="${i}" title="${nm}">0${i}</button>`).join('');
   $('elabs').innerHTML = ELABS.map(() => '<span class="el"></span>').join('');
-  $('hots').innerHTML = HOTS.map(([k]) => `<button class="hot lab" data-h="${k}">${hotLabel(k)}</button>`).join('');
+  $('hots').innerHTML = HOTS.map(([k]) => `<button class="hot lab" data-h="${k}" data-drag><span class="ht">${hotLabel(k)}</span><i class="hx" data-hx>×</i></button>`).join('');
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting && !e.target.classList.contains('in')) e.target.querySelectorAll('.stats b').forEach(decode);
     e.target.classList.toggle('in', e.isIntersecting); }), { threshold: 0.3 });
@@ -484,7 +495,7 @@ function decode(el) {
 
 /* ══════════ ПОПОВЕР, ВІКНО, ПЕРЕХОДИ ══════════ */
 function pop(title, text, x, y, html = '') {
-  const p = $('pop'); p.innerHTML = `<div class="eb">${T[lang].ui.term}</div><b>${title}</b>${text ? `<p class="ps">${esc(text)}</p>` : ''}${html}`; p.style.display = 'block';
+  const p = $('pop'); p.innerHTML = `<button class="px" data-px aria-label="${T[lang].ui.close}">×</button><div class="eb" data-drag>${T[lang].ui.term}</div><b>${title}</b>${text ? `<p class="ps">${esc(text)}</p>` : ''}${html}`; p.style.display = 'block';
   const w = p.offsetWidth, h = p.offsetHeight;
   p.style.left = Math.min(innerWidth - w - 12, Math.max(12, x + 14)) + 'px'; p.style.top = Math.min(innerHeight - h - 12, Math.max(60, y + 14)) + 'px';
 }
@@ -581,6 +592,10 @@ document.addEventListener('click', e => {
   const t = e.target;
   if (t.id === 'expBtn') { $('menu').classList.toggle('on'); return; }
   if (!t.closest('#menu')) $('menu').classList.remove('on');
+  if (t.closest('[data-px]')) { unpop(); return; }
+  const nx = t.closest('[data-nx]'); if (nx) { const n = nx.closest('.note'), m = n.classList.toggle('min'); nx.textContent = m ? '+' : '×'; return; }
+  const hx = t.closest('[data-hx]'); if (hx) { HIDDEN.add(hx.parentElement.dataset.h); return; }
+  if (t.id === 'quiet') { quiet = !quiet; store.set('quiet', quiet ? '1' : '0'); if (!quiet) { HIDDEN.clear(); document.querySelectorAll('.note.min').forEach(n => { n.classList.remove('min'); n.querySelector('.nx').textContent = '×'; }); } render(); return; }
   const term = t.closest('.term'); if (term) { popG(term.dataset.g, e.clientX, e.clientY); return; }
   const gl = t.closest('[data-gl]'); if (gl) { unpop(); openGloss(gl.dataset.gl); return; }
   if (t.id === 'glossBtn') { $('menu').classList.remove('on'); openGloss(); return; }
@@ -622,6 +637,27 @@ addEventListener('keydown', e => {
   if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); goTo(curSec() - 1); }
 });
 addEventListener('scroll', unpop, { passive: true });
+
+/* ══════════ ПЕРЕТЯГУВАННЯ: картки (за «око»), підказка, мітки сцени ══════════ */
+const HIDDEN = new Set();                              // мітки сцени, закриті хрестиком
+let dragEl = null, eatClick = false;
+document.addEventListener('pointerdown', e => {
+  const h = e.target.closest('[data-drag]'); if (!h || e.target.closest('[data-hx]')) return;
+  const el = h.closest('.hot, #pop, .note'); if (!el) return;
+  dragEl = { el, x: e.clientX, y: e.clientY, moved: false };
+});
+addEventListener('pointermove', e => {
+  if (!dragEl) return;
+  const { el } = dragEl, ddx = e.clientX - dragEl.x, ddy = e.clientY - dragEl.y;
+  if (!dragEl.moved && Math.hypot(ddx, ddy) < 4) return;
+  dragEl.moved = true; dragEl.x = e.clientX; dragEl.y = e.clientY; document.body.classList.add('dragging');
+  if (el.id === 'pop') { el.style.left = el.offsetLeft + ddx + 'px'; el.style.top = el.offsetTop + ddy + 'px'; }
+  else if (el.classList.contains('hot')) { const o = HOTS[[...el.parentElement.children].indexOf(el)][2]; o[0] += ddx; o[1] += ddy; }
+  else { el._dx = (el._dx || 0) + ddx; el._dy = (el._dy || 0) + ddy; el.style.translate = `${el._dx}px ${el._dy}px`; }
+});
+addEventListener('pointerup', () => { if (dragEl?.moved) eatClick = true; dragEl = null; document.body.classList.remove('dragging'); });
+// після перетягування клік не відкриває картку чи підказку
+document.addEventListener('click', e => { if (eatClick) { eatClick = false; e.stopPropagation(); e.preventDefault(); } }, true);
 
 /* ══════════ КНОПКИ: лінза, призма, магніт ══════════ */
 const calm = matchMedia('(prefers-reduced-motion: reduce)').matches, BTN = '.btn, .try button';
@@ -1147,7 +1183,7 @@ function overlays() {
   // точки-сноски: мітка на об’єкті + лінія до кнопки з підписом; рухаються разом з об’єктом
   const hl = [], busy = $('modal').classList.contains('on');
   document.querySelectorAll('.hot').forEach((h, n) => {
-    const [k, at, [dx, dy], secs] = HOTS[n], w = secs.includes(curSec()) ? at() : null; if (!w) { h.style.opacity = 0; h.style.pointerEvents = 'none'; return; }
+    const [k, at, [dx, dy], secs] = HOTS[n], w = secs.includes(curSec()) && !HIDDEN.has(k) ? at() : null; if (!w) { h.style.opacity = 0; h.style.pointerEvents = 'none'; return; }
     const [x, y, z] = scr(w.toArray()), lx = x + dx, ly = y + dy;
     const show = !busy && z < 1 && x > 10 && x < innerWidth - 10 && y > 50 && y < innerHeight - 10 && lx > 10 && lx < innerWidth - 120 && ly > 60 && ly < innerHeight - 30 && ((k !== 'bead' && k !== 'cell') || gemV > 0.5);
     h.style.transform = `translate(${lx}px, ${ly - 12}px)`; h.style.opacity = show ? 1 : 0; h.style.pointerEvents = show ? 'auto' : 'none';
